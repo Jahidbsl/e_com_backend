@@ -1,0 +1,32 @@
+setap django&database:
+            pip3 install django djangorestframework psycopg2-binary python-dotenv
+
+            django-admin startproject e_com_backend .
+
+            python3 manage.py startapp store
+
+
+            after setap db:
+            python3 manage.py migrate
+
+
+            create superuser:
+            python3 manage.py createsuperuser
+
+            run server:
+            python3 manage.py runserver
+
+
+            cors:
+            pip3 install django-cors-headers
+            update setting middelware 'corsheaders.middleware.CorsMiddleware',
+
+            and add :CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+
+create model then commend: python3 manage.py makemigrations
+then: python3 manage.py migrate
+
+
