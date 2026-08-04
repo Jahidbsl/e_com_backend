@@ -30,3 +30,8 @@ create model then commend: python3 manage.py makemigrations
 then: python3 manage.py migrate
 
 
+to support image : pip3 install pillow
+
+then register in sitting.py : 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
