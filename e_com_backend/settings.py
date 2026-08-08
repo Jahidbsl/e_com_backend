@@ -137,7 +137,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "https://e-com-frontend-kohl.vercel.app",
 ]
 
 MEDIA_URL = "/media/"
