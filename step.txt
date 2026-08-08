@@ -35,3 +35,6 @@ to support image : pip3 install pillow
 then register in sitting.py : 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+for jwt : pip install djangorestframework-simplejwt
