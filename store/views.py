@@ -71,10 +71,85 @@ def update_cart_quantity(request):
         return Response(serializer.data)
     except CartItem.DoesNotExist:
         return Response({"error": "Cart item not found"}, status=404)
-        
-        
-       
-    
 
-    
-   
+
+# ORDERS API VIEWS
+@api_view(["POST"])
+def create_order(request):
+    try:
+        data = request.data
+
+        name = data.get("name")
+        address = data.get("address")
+        phone = data.get("phone")
+        payment_method = data.get("payment_method", "COD")
+        cart_items = data.get("items", [])
+
+        if not cart_items:
+            return Response(
+                {"success": False, "error": "Cart is empty"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        total_amount = Decimal("0.00")
+        validated_items = []
+
+        for item in cart_items:
+            product_id = item.get("product") or item.get("product_id") or item.get("id")
+            quantity = int(item.get("quantity", 1))
+
+            if not product_id:
+                continue
+
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response(
+                    {
+                        "success": False,
+                        "error": f"Product with ID {product_id} not found",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            price = product.price
+            total_amount += price * quantity
+
+            validated_items.append(
+                {"product": product, "quantity": quantity, "price": price}
+            )
+
+        order = Order.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            total_amount=total_amount,
+        )
+
+        for v_item in validated_items:
+            OrderItem.objects.create(
+                order=order,
+                product=v_item["product"],
+                quantity=v_item["quantity"],
+                price=v_item["price"],
+            )
+
+        # Database theke cart items clear kora (Authenticated ba Guest user-er jonno)
+        if request.user.is_authenticated:
+            CartItem.objects.filter(cart__user=request.user).delete()
+        else:
+            cart_id = data.get("cart_id")
+            if cart_id:
+                CartItem.objects.filter(cart_id=cart_id).delete()
+
+        return Response(
+            {
+                "success": True,
+                "message": "Order created successfully",
+                "order_id": order.id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        return Response(
+            {"success": False, "error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+        )
